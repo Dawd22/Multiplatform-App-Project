@@ -53,6 +53,8 @@ private slots:
     void insertImage();
 
     void changeBackgroundColor();
+
+    void setLineSpacing();
 private:
     Ui::MainWindow *ui;
 
@@ -81,6 +83,8 @@ private:
     QPushButton *insertImageButton;
 
     QPushButton *colorButton;
+
+    QPushButton *spacingButton;
 
 };
 

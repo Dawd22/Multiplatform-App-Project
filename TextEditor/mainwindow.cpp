@@ -112,13 +112,36 @@ MainWindow::MainWindow(QWidget *parent)
 
     layout->addWidget(colorButton);
 
-
+    spacingButton = new QPushButton("Set Line Spacing", this);
+    spacingButton->setMaximumWidth(120);
+    connect(spacingButton, &QPushButton::clicked, this, &MainWindow::setLineSpacing);
+    layout->addWidget(spacingButton);
 
     layout->addWidget(textEdit);
 
 
 
 }
+
+void MainWindow::setLineSpacing()
+{
+    bool ok;
+    int spacing = QInputDialog::getInt(this, tr("Térköz beállítása"), tr("Térköz (pixel):"), 0, 0, 100, 1, &ok);
+        if (ok) {
+            QTextBlockFormat blockFormat;
+            blockFormat.setLineHeight(spacing, QTextBlockFormat::FixedHeight);
+
+            QTextCursor cursor = textEdit->textCursor();
+            cursor.select(QTextCursor::Document);
+            cursor.mergeBlockFormat(blockFormat);
+            cursor.clearSelection();
+
+            // Opcionális: alapértelmezett betűtípus beállítása
+            QFont defaultFont("Arial", 12);
+            textEdit->setFont(defaultFont);
+        }
+}
+
 void MainWindow::changeBackgroundColor()
 {
     QColor color = QColorDialog::getColor(Qt::white, this, "Válasszon háttérszínt");
@@ -287,6 +310,9 @@ void MainWindow::on_actionOpen_triggered()
 
         layout->addWidget(colorButton);
 
+        spacingButton->setMaximumWidth(120);
+        layout->addWidget(spacingButton);
+
         layout->addWidget(numberedListButton);
     }
     else{
@@ -361,6 +387,11 @@ void MainWindow::on_actionOpen_triggered()
 
         layout->addWidget(colorButton);
 
+        spacingButton = new QPushButton("Set Line Spacing", this);
+        spacingButton->setMaximumWidth(120);
+        connect(spacingButton, &QPushButton::clicked, this, &MainWindow::setLineSpacing);
+        layout->addWidget(spacingButton);
+
         layout->addWidget(numberedListButton);
 
     }
@@ -433,6 +464,8 @@ void MainWindow::on_actionClose_triggered()
         insertImageButton = nullptr;
         delete  colorButton;
         colorButton = nullptr;
+        delete spacingButton;
+        spacingButton = nullptr;
     }
 }
 
