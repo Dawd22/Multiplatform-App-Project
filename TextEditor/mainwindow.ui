@@ -30,6 +30,7 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionClose"/>
+    <addaction name="actionPrint"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -65,6 +66,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="text">
+    <string>Print</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

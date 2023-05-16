@@ -11,6 +11,16 @@
 #include <QVBoxLayout>
 #include <QFontDatabase>
 #include <QAction>
+#include <QPushButton>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QInputDialog>
+#include <QTextTable>
+#include <QTextTableFormat>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextImageFormat>
+
 QIcon createColorIcon(const QColor &color)
 {
     QPixmap pixmap(16, 16);
@@ -79,6 +89,23 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(boldComboBox);
     layout->addWidget(italicComboBox);
     layout->addWidget(underlineComboBox);
+
+    numberedListButton = new QPushButton("Numbered List", this);
+    numberedListButton->setMaximumWidth(120);
+    connect(numberedListButton, &QPushButton::clicked, this, &MainWindow::on_numberedListButton_clicked);
+    layout->addWidget(numberedListButton);
+
+    createTableButton = new QPushButton("Create table", this);
+    createTableButton->setMaximumWidth(120);
+    connect(createTableButton, &QPushButton::clicked, this, &MainWindow::createTable);
+    layout->addWidget(createTableButton);
+
+    insertImageButton = new QPushButton("Insert image", this);
+    insertImageButton->setMaximumWidth(120);
+    connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
+
+    layout->addWidget(insertImageButton);
+
     layout->addWidget(textEdit);
 
 
@@ -163,6 +190,39 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::createNumberedList()
+{
+    QTextDocument* document = textEdit->document();
+    QTextCursor cursor = textEdit->textCursor();
+
+    // Ellenőrizzük, hogy van-e kijelölt szöveg
+    if (!cursor.hasSelection())
+        return;
+
+    // Lekérdezzük a kijelölt szöveg kezdő és végpozícióját
+    int selectionStart = cursor.selectionStart();
+    int selectionEnd = cursor.selectionEnd();
+
+    // Mozgatjuk a kurzort a kijelölés kezdő pozíciójára
+    cursor.setPosition(selectionStart);
+
+    // Végigmegyünk a sorokon a kijelölt szövegrészben és számozzuk őket
+    int lineNumber = 1;
+    while (cursor.position() < selectionEnd) {
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.insertText(QString::number(lineNumber) + ". ");
+        cursor.movePosition(QTextCursor::NextBlock);
+        lineNumber++;
+    }
+
+    // Frissítjük a textEdit tartalmát
+    textEdit->setDocument(document);
+}
+
+void MainWindow::on_numberedListButton_clicked()
+{
+    createNumberedList();
+}
 
 void MainWindow::on_actionExit_triggered()
 {
@@ -205,6 +265,18 @@ void MainWindow::on_actionOpen_triggered()
         layout->addWidget(boldComboBox);
         layout->addWidget(italicComboBox);
         layout->addWidget(underlineComboBox);
+
+        numberedListButton->setMaximumWidth(120);
+
+        connect(createTableButton, &QPushButton::clicked, this, &MainWindow::createTable);
+        createTableButton->setMaximumWidth(120);
+        layout->addWidget(createTableButton);
+
+        insertImageButton->setMaximumWidth(120);
+        connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
+        layout->addWidget(insertImageButton);
+
+        layout->addWidget(numberedListButton);
     }
     else{
         fontSizeComboBox = new QComboBox(this);
@@ -256,6 +328,22 @@ void MainWindow::on_actionOpen_triggered()
         layout->addWidget(boldComboBox);
         layout->addWidget(italicComboBox);
         layout->addWidget(underlineComboBox);
+
+        numberedListButton = new QPushButton("Numbered List", this);
+        numberedListButton->setMaximumWidth(120);
+
+        createTableButton = new QPushButton("Táblázat létrehozása", this);
+        createTableButton->setMaximumWidth(120);
+        connect(createTableButton, &QPushButton::clicked, this, &MainWindow::createTable);
+        layout->addWidget(createTableButton);
+
+        insertImageButton = new QPushButton("Insert image", this);
+        insertImageButton->setMaximumWidth(120);
+        connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
+
+        layout->addWidget(insertImageButton);
+
+        layout->addWidget(numberedListButton);
 
     }
 
@@ -319,6 +407,12 @@ void MainWindow::on_actionClose_triggered()
         boldComboBox = nullptr;
         italicComboBox = nullptr;
         underlineComboBox = nullptr;
+        delete numberedListButton;
+        numberedListButton = nullptr;
+        delete createTableButton;
+        createTableButton = nullptr;
+        delete insertImageButton;
+        insertImageButton = nullptr;
     }
 }
 
@@ -344,6 +438,67 @@ void MainWindow::on_actionSave_triggered()
                 file.close();
             }
         }
+    }
+}
+
+void MainWindow::createTable()
+{
+    bool ok;
+    int rows = QInputDialog::getInt(this, tr("Táblázat létrehozása"), tr("Sorok száma:"), 3, 1, 100, 1, &ok);
+    if (!ok) return;
+
+    int columns = QInputDialog::getInt(this, tr("Táblázat létrehozása"), tr("Oszlopok száma:"), 3, 1, 100, 1, &ok);
+    if (!ok) return;
+
+    QTextCursor cursor = textEdit->textCursor();
+
+    QTextTableFormat tableFormat;
+    tableFormat.setBorderStyle(QTextTableFormat::BorderStyle_Solid);
+    tableFormat.setCellPadding(5);
+    tableFormat.setCellSpacing(0);
+    QTextTable *table = cursor.insertTable(rows, columns, tableFormat);
+
+    // Beállítjuk a cellák tartalmát
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < columns; ++col) {
+            QTextTableCell cell = table->cellAt(row, col);
+            QTextCursor cellCursor = cell.firstCursorPosition();
+            QString text = QInputDialog::getText(this, tr("Cella tartalma"), tr("Írja be a(z) %1 sor %2 oszlop tartalmát:").arg(row + 1).arg(col + 1));
+            cellCursor.insertText(text);
+        }
+    }
+}
+
+void MainWindow::insertImage()
+{
+    QString imagePath = QFileDialog::getOpenFileName(this, tr("Kép kiválasztása"), "", tr("Képfájlok (*.png *.jpg *.bmp)"));
+    if (imagePath.isEmpty())
+        return;
+
+    QImage image(imagePath);
+    if (image.isNull())
+    {
+        QMessageBox::warning(this, tr("Hiba"), tr("Nem sikerült betölteni a képet."));
+        return;
+    }
+    QSize imageSize(120, 120);
+    image = image.scaled(imageSize, Qt::KeepAspectRatio);
+    QTextCursor cursor = textEdit->textCursor();
+    QTextImageFormat imageFormat;
+    imageFormat.setName(imagePath);
+    imageFormat.setWidth(image.width());
+    imageFormat.setHeight(image.height());
+    cursor.insertImage(imageFormat);
+}
+
+void MainWindow::on_actionPrint_triggered()
+{
+    QPrinter printer;
+    QPrintDialog printDialog(&printer, this);
+
+    if (printDialog.exec() == QDialog::Accepted) {
+        QTextDocument* document = textEdit->document();
+        document->print(&printer);
     }
 }
 

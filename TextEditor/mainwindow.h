@@ -6,7 +6,7 @@
 #include <QComboBox>
 #include <QVBoxLayout>
 #include <QAction>
-
+#include <QPushButton>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -42,6 +42,14 @@ private slots:
 
     void toggleUnderline();
 
+    void createNumberedList();
+
+    void on_numberedListButton_clicked();
+
+    void on_actionPrint_triggered();
+
+    void createTable();
+    void insertImage();
 private:
     Ui::MainWindow *ui;
 
@@ -62,6 +70,12 @@ private:
     QComboBox *italicComboBox;
 
     QComboBox *underlineComboBox;
+
+    QPushButton *numberedListButton;
+
+    QPushButton *createTableButton;
+
+    QPushButton *insertImageButton;
 
 };
 
