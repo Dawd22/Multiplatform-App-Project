@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTextImageFormat>
+#include <QColorDialog>
 
 QIcon createColorIcon(const QColor &color)
 {
@@ -103,13 +104,28 @@ MainWindow::MainWindow(QWidget *parent)
     insertImageButton = new QPushButton("Insert image", this);
     insertImageButton->setMaximumWidth(120);
     connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
-
     layout->addWidget(insertImageButton);
+
+    colorButton= new QPushButton("Background color", this);
+    colorButton->setMaximumWidth(120);
+    connect(colorButton, &QPushButton::clicked, this, &MainWindow::changeBackgroundColor);
+
+    layout->addWidget(colorButton);
+
+
 
     layout->addWidget(textEdit);
 
 
 
+}
+void MainWindow::changeBackgroundColor()
+{
+    QColor color = QColorDialog::getColor(Qt::white, this, "Válasszon háttérszínt");
+    if (color.isValid()) {
+        QString styleSheet = QString("background-color: %1").arg(color.name());
+        textEdit->setStyleSheet(styleSheet);
+    }
 }
 
 void MainWindow::toggleBold()
@@ -235,32 +251,24 @@ void MainWindow::on_actionOpen_triggered()
 {   if(fontSizeComboBox){
 
         fontSizeComboBox->setMaximumWidth(40);
-        connect(fontSizeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::changeFontSize);
+
         layout->addWidget(fontSizeComboBox);
 
         layout->addWidget(textColorComboBox);
 
         alignmentComboBox->setMaximumWidth(100);
-        connect(alignmentComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::changeAlignment);
+
         layout->addWidget(alignmentComboBox);
 
         fontComboBox->setMaximumWidth(150);
-        connect(fontComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::changeFont);
+
         layout->addWidget(fontComboBox);
 
-
-
         boldComboBox->setMaximumWidth(120);
-        connect(boldComboBox, QOverload<int>::of(&QComboBox::activated), this, &MainWindow::toggleBold);
-
-
 
         italicComboBox->setMaximumWidth(120);
-        connect(italicComboBox, QOverload<int>::of(&QComboBox::activated), this, &MainWindow::toggleItalic);
-
 
         underlineComboBox->setMaximumWidth(120);
-        connect(underlineComboBox, QOverload<int>::of(&QComboBox::activated), this, &MainWindow::toggleUnderline);
 
         layout->addWidget(boldComboBox);
         layout->addWidget(italicComboBox);
@@ -268,13 +276,16 @@ void MainWindow::on_actionOpen_triggered()
 
         numberedListButton->setMaximumWidth(120);
 
-        connect(createTableButton, &QPushButton::clicked, this, &MainWindow::createTable);
         createTableButton->setMaximumWidth(120);
         layout->addWidget(createTableButton);
 
         insertImageButton->setMaximumWidth(120);
-        connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
+
         layout->addWidget(insertImageButton);
+
+        colorButton->setMaximumWidth(120);
+
+        layout->addWidget(colorButton);
 
         layout->addWidget(numberedListButton);
     }
@@ -330,6 +341,7 @@ void MainWindow::on_actionOpen_triggered()
         layout->addWidget(underlineComboBox);
 
         numberedListButton = new QPushButton("Numbered List", this);
+        connect(numberedListButton, &QPushButton::clicked, this, &MainWindow::on_numberedListButton_clicked);
         numberedListButton->setMaximumWidth(120);
 
         createTableButton = new QPushButton("Táblázat létrehozása", this);
@@ -342,6 +354,12 @@ void MainWindow::on_actionOpen_triggered()
         connect(insertImageButton, &QPushButton::clicked, this, &MainWindow::insertImage);
 
         layout->addWidget(insertImageButton);
+
+        colorButton= new QPushButton("Background color", this);
+        colorButton->setMaximumWidth(120);
+        connect(colorButton, &QPushButton::clicked, this, &MainWindow::changeBackgroundColor);
+
+        layout->addWidget(colorButton);
 
         layout->addWidget(numberedListButton);
 
@@ -413,6 +431,8 @@ void MainWindow::on_actionClose_triggered()
         createTableButton = nullptr;
         delete insertImageButton;
         insertImageButton = nullptr;
+        delete  colorButton;
+        colorButton = nullptr;
     }
 }
 

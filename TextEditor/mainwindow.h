@@ -49,7 +49,10 @@ private slots:
     void on_actionPrint_triggered();
 
     void createTable();
+
     void insertImage();
+
+    void changeBackgroundColor();
 private:
     Ui::MainWindow *ui;
 
@@ -76,6 +79,8 @@ private:
     QPushButton *createTableButton;
 
     QPushButton *insertImageButton;
+
+    QPushButton *colorButton;
 
 };
 
